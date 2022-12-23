@@ -1,0 +1,374 @@
+Problem in module unified_planning.model.problem object
+
+class PPrroobblleemm(unified_planning.model.abstract_problem.AbstractProblem, unified_planning.model.mixins.user_types_set.UserTypesSetMixin, unified_planning.model.mixins.fluents_set.FluentsSetMixin, unified_planning.model.mixins.actions_set.ActionsSetMixin, unified_planning.model.mixins.objects_set.ObjectsSetMixin)
+ |  Problem(name: Union[str, NoneType] = None, env: Union[ForwardRef('up.environment.Environment'), NoneType] = None, *, initial_defaults: Dict[ForwardRef('up.model.types.Type'), ForwardRef('ConstantExpression')] = {})
+ |  
+ |  Represents the classical planning problem, with :class:`Actions <unified_planning.model.Action>`, :class:`Fluents <unified_planning.model.Fluent>`, :class:`Objects <unified_planning.model.Object>` and :class:`UserTypes <unified_planning.model.Type>`.
+ |  
+ |  The `Actions` can be :class:`DurativeActions <unified_planning.model.DurativeAction>` when the `Problem` deals with time.
+ |  
+ |  Method resolution order:
+ |      Problem
+ |      unified_planning.model.abstract_problem.AbstractProblem
+ |      unified_planning.model.mixins.user_types_set.UserTypesSetMixin
+ |      unified_planning.model.mixins.fluents_set.FluentsSetMixin
+ |      unified_planning.model.mixins.actions_set.ActionsSetMixin
+ |      unified_planning.model.mixins.objects_set.ObjectsSetMixin
+ |      builtins.object
+ |  
+ |  Methods defined here:
+ |  
+ |  ____eeqq____(self, oth: object) -> bool
+ |      Return self==value.
+ |  
+ |  ____hhaasshh____(self) -> int
+ |      Return hash(self).
+ |  
+ |  ____iinniitt____(self, name: Union[str, NoneType] = None, env: Union[ForwardRef('up.environment.Environment'), NoneType] = None, *, initial_defaults: Dict[ForwardRef('up.model.types.Type'), ForwardRef('ConstantExpression')] = {})
+ |      Initialize self.  See help(type(self)) for accurate signature.
+ |  
+ |  ____rreepprr____(self) -> str
+ |      Return repr(self).
+ |  
+ |  aadddd__ddeeccrreeaassee__eeffffeecctt(self, timing: 'up.model.timing.Timing', fluent: Union[ForwardRef('up.model.fnode.FNode'), ForwardRef('up.model.fluent.Fluent')], value: 'up.model.expression.Expression', condition: 'up.model.expression.BoolExpression' = True)
+ |      Adds the given timed decrease effect to the problem; a `timed effect` is an :class:`~unified_planning.model.Effect` applied at a fixed time.
+ |      
+ |      :param timing: The exact time in which the given `Effect` is applied.
+ |      :param fluent: The fluent decreased by the `Effect`.
+ |      :param value: The value of which the given `fluent` is decrease at the given `time`.
+ |      :param condition: The condition that must be evaluated to `True` in order for this `Effect` to be
+ |          actually applied.
+ |  
+ |  aadddd__ggooaall(self, goal: Union[ForwardRef('up.model.fnode.FNode'), ForwardRef('up.model.fluent.Fluent'), bool])
+ |      Adds the given `goal` to the `Problem`; a goal is an expression that must be evaluated to `True` at the
+ |      end of the execution of a :class:`~unified_planning.plans.Plan`. If a `Plan` does not satisfy all the given `goals`, it is not valid.
+ |      
+ |      :param goal: The expression added to the `Problem` :func:`goals <unified_planning.model.Problem.goals>`.
+ |  
+ |  aadddd__iinnccrreeaassee__eeffffeecctt(self, timing: 'up.model.timing.Timing', fluent: Union[ForwardRef('up.model.fnode.FNode'), ForwardRef('up.model.fluent.Fluent')], value: 'up.model.expression.Expression', condition: 'up.model.expression.BoolExpression' = True)
+ |      Adds the given `timed increase effect` to the `Problem`; a `timed effect` is an :class:`~unified_planning.model.Effect` applied at a fixed time.
+ |      
+ |      :param timing: The exact time in which the given `Effect` is applied.
+ |      :param fluent: The fluent increased by the `Effect`.
+ |      :param value: The value of which the given `fluent` is increased at the given `time`.
+ |      :param condition: The condition that must be evaluated to `True` in order for this `Effect` to be
+ |          actually applied.
+ |  
+ |  aadddd__qquuaalliittyy__mmeettrriicc(self, metric: 'up.model.metrics.PlanQualityMetric')
+ |      Adds the given `quality metric` to the `Problem`; a `quality metric` defines extra requirements that a :class:`~unified_planning.plans.Plan`
+ |      must satisfy in order to be valid.
+ |      
+ |      :param metric: The `quality metric` that a `Plan` of this `Problem` must satisfy in order to be valid.
+ |  
+ |  aadddd__ttiimmeedd__eeffffeecctt(self, timing: 'up.model.timing.Timing', fluent: Union[ForwardRef('up.model.fnode.FNode'), ForwardRef('up.model.fluent.Fluent')], value: 'up.model.expression.Expression', condition: 'up.model.expression.BoolExpression' = True)
+ |      Adds the given `timed effect` to the `Problem`; a `timed effect` is an :class:`~unified_planning.model.Effect` applied at a fixed time.
+ |      
+ |      :param timing: The exact time in which the given `Effect` is applied.
+ |      :param fluent: The fluent modified by the `Effect`.
+ |      :param value: The value assigned to the given `fluent` at the given `time`.
+ |      :param condition: The condition that must be evaluated to `True` in order for this `Effect` to be
+ |          actually applied.
+ |  
+ |  aadddd__ttiimmeedd__ggooaall(self, interval: Union[ForwardRef('up.model.timing.Timing'), ForwardRef('up.model.timing.TimeInterval')], goal: Union[ForwardRef('up.model.fnode.FNode'), ForwardRef('up.model.fluent.Fluent'), bool])
+ |      Adds the `timed goal` to the `Problem`. A `timed goal` is a `goal` that must be satisfied in a
+ |      given period of time.
+ |      
+ |      :param interval: The interval of time in which the given goal must be `True`.
+ |      :param goal: The expression that must be evaluated to `True` in the given `interval`.
+ |  
+ |  cclleeaarr__ggooaallss(self)
+ |      Removes all the `goals` from the `Problem`.
+ |  
+ |  cclleeaarr__qquuaalliittyy__mmeettrriiccss(self)
+ |      Removes all the `quality metrics` in the `Problem`.
+ |  
+ |  cclleeaarr__ttiimmeedd__eeffffeeccttss(self)
+ |      Removes all the `timed effects` from the `Problem`.
+ |  
+ |  cclleeaarr__ttiimmeedd__ggooaallss(self)
+ |      Removes all the `timed goals` from the `Problem`.
+ |  
+ |  cclloonnee(self)
+ |  
+ |  ggeett__ssttaattiicc__fflluueennttss(self) -> Set[ForwardRef('up.model.fluent.Fluent')]
+ |      Returns the set of the `static fluents`.
+ |      
+ |      `Static fluents` are those who can't change their values because they never
+ |      appear in the :func:`fluent <unified_planning.model.Effect.fluent>` field of an `Effect`, therefore there are no :func:`Actions <unified_planning.model.Problem.actions>`
+ |      in the `Problem` that can change their value.
+ |  
+ |  hhaass__nnaammee(self, name: str) -> bool
+ |      Returns `True` if the given `name` is already in the `Problem`, `False` otherwise.
+ |      
+ |      :param name: The target name to find in the `Problem`.
+ |      :return: `True` if the given `name` is already in the `Problem`, `False` otherwise.
+ |  
+ |  iinniittiiaall__vvaalluuee(self, fluent: Union[ForwardRef('up.model.fnode.FNode'), ForwardRef('up.model.fluent.Fluent')]) -> 'up.model.fnode.FNode'
+ |      Retrieves the initial value assigned to the given `fluent`.
+ |      
+ |      :param fluent: The target `fluent` of which the `value` in the initial state must be retrieved.
+ |      :return: The `value` expression assigned to the given `fluent` in the initial state.
+ |  
+ |  nnoorrmmaalliizzee__ppllaann(self, plan: 'up.plans.Plan') -> 'up.plans.Plan'
+ |      Normalizes the given `Plan`, that is potentially the result of another
+ |      `Problem`, updating the :class:`~unified_planning.model.Object` references present in it with the ones of
+ |      this `Problem` which are syntactically equal.
+ |      
+ |      :param plan: The `Plan` that must be normalized.
+ |      :return: A `Plan` syntactically valid for this `Problem`.
+ |  
+ |  sseett__iinniittiiaall__vvaalluuee(self, fluent: Union[ForwardRef('up.model.fnode.FNode'), ForwardRef('up.model.fluent.Fluent')], value: Union[ForwardRef('up.model.fnode.FNode'), ForwardRef('up.model.fluent.Fluent'), ForwardRef('up.model.object.Object'), bool, int, float, fractions.Fraction])
+ |      Sets the initial value for the given `Fluent`. The given `Fluent` must be grounded, therefore if
+ |      it's :func:`arity <unified_planning.model.Fluent.arity>` is `> 0`, the `fluent` parameter must be
+ |      an `FNode` and the method :func:`~unified_planning.model.FNode.is_fluent_exp` must return `True`.
+ |      
+ |      :param fluent: The grounded `Fluent` of which the initial value must be set.
+ |      :param value: The `value` assigned in the initial state to the given `fluent`.
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors defined here:
+ |  
+ |  eexxpplliicciitt__iinniittiiaall__vvaalluueess
+ |      Returns the problem's defined initial values; those are only the initial values set with the
+ |      :func:`~unified_planning.model.Problem.set_initial_value` method.
+ |      
+ |      IMPORTANT NOTE: For all the initial values of the problem use :func:`initial_values <unified_planning.model.Problem.initial_values>`.
+ |  
+ |  ggooaallss
+ |      Returns all the `goals` in the `Problem`.
+ |  
+ |  iinniittiiaall__vvaalluueess
+ |      Gets the initial value of all the grounded fluents present in the `Problem`.
+ |      
+ |      IMPORTANT NOTE: this property does a lot of computation, so it should be called as
+ |      seldom as possible.
+ |  
+ |  kkiinndd
+ |      Calculates and returns the `problem kind` of this `planning problem`.
+ |      If the `Problem` is modified, this method must be called again in order to be reliable.
+ |      
+ |      IMPORTANT NOTE: this property does a lot of computation, so it should be called as
+ |      seldom as possible.
+ |  
+ |  qquuaalliittyy__mmeettrriiccss
+ |      Returns all the `quality metrics` in the `Problem`.
+ |  
+ |  ttiimmeedd__eeffffeeccttss
+ |      Returns all the `timed effects` in the `Problem`.
+ |  
+ |  ttiimmeedd__ggooaallss
+ |      Returns all the `timed goals` in the `Problem`.
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from unified_planning.model.abstract_problem.AbstractProblem:
+ |  
+ |  ____ddiicctt____
+ |      dictionary for instance variables (if defined)
+ |  
+ |  ____wweeaakkrreeff____
+ |      list of weak references to the object (if defined)
+ |  
+ |  eennvv
+ |      Returns the `Problem` `Environment`.
+ |  
+ |  nnaammee
+ |      Returns the `Problem` `name`.
+ |  
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from unified_planning.model.mixins.user_types_set.UserTypesSetMixin:
+ |  
+ |  hhaass__ttyyppee(self, name: str) -> bool
+ |      Returns `True` if the `type` with the given `name` is defined in the
+ |      `problem`, `False`, otherwise.
+ |      
+ |      :param name: The target `name` for the `type`.
+ |      :return: `True` if a `type` with the given `name` is in the `problem`,
+ |          `False` otherwise.
+ |  
+ |  uusseerr__ttyyppee(self, name: str) -> 'up.model.types.Type'
+ |      Returns the `user type` in the `problem` with the given `name`.
+ |      
+ |      :param name: The target `name` for the `type`.
+ |      :return: The `type` in the `problem` with the given `name`.
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from unified_planning.model.mixins.user_types_set.UserTypesSetMixin:
+ |  
+ |  uusseerr__ttyyppeess
+ |      Returns the `list` of all the `user types` in the `problem`.
+ |  
+ |  uusseerr__ttyyppeess__hhiieerraarrcchhyy
+ |      Returns a `Dict` where every `key` represents an `Optional Type` and the `value`
+ |      associated to the `key` is the `List` of the `direct sons` of the `Optional Type`.
+ |      
+ |      All the `user types` corresponding to the 'None' key are fatherless.
+ |  
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from unified_planning.model.mixins.fluents_set.FluentsSetMixin:
+ |  
+ |  aadddd__fflluueenntt(self, fluent_or_name: Union[ForwardRef('up.model.fluent.Fluent'), str], typename: Union[ForwardRef('up.model.types.Type'), NoneType] = None, *, default_initial_value: Union[ForwardRef('ConstantExpression'), NoneType] = None, **kwargs: 'up.model.types.Type') -> 'up.model.fluent.Fluent'
+ |      Adds the given `fluent` to the `problem`.
+ |      
+ |      If the first parameter is not a `Fluent`, the parameters will be passed to the `Fluent` constructor to create it.
+ |      
+ |      :param fluent_or_name: `Fluent` instance or `name` of the `fluent` to be constructed.
+ |      :param typename: If only the `name` of the `fluent` is given, this is the `fluent's type` (passed to the `Fluent` constructor).
+ |      :param default_initial_value: If provided, defines the default value taken in initial state by
+ |                                    a state variable of this `fluent` that has no explicit value.
+ |      :param kwargs: If only the `name` of the `fluent` is given, these are the `fluent's parameters` (passed to the `Fluent` constructor).
+ |      :return: The `fluent` passed or constructed.
+ |      
+ |      Example
+ |      --------
+ |      >>> from unified_planning.shortcuts import *
+ |      >>> problem = Problem()
+ |      >>> location = UserType("Location")
+ |      >>> at_loc = Fluent("at_loc", BoolType(), l=location)  # creates a new fluent
+ |      >>> problem.add_fluent(at_loc)  # adds it to the problem
+ |      bool at_loc[l=Location]
+ |      >>> problem.add_fluent("connected", BoolType(), l1=location, l2=location)  # creates a new fluent and add it to the problem.
+ |      bool connected[l1=Location, l2=Location]
+ |      >>>
+ |  
+ |  aadddd__fflluueennttss(self, fluents: List[ForwardRef('up.model.fluent.Fluent')])
+ |      Adds the given `list` of `fluents` to the `problem`.
+ |      
+ |      :param fluents: The `list` of `fluents` that must be added to the `problem`.
+ |  
+ |  fflluueenntt(self, name: str) -> 'up.model.fluent.Fluent'
+ |      Returns the `fluent` with the given name.
+ |      
+ |      :param name: The `name` of the target `fluent`:
+ |      :return: The `fluent` with the given `name`.
+ |  
+ |  hhaass__fflluueenntt(self, name: str) -> bool
+ |      Returns `True` if the `fluent` with the given `name` is in the `problem`,
+ |      `False` otherwise.
+ |      
+ |      :param name: The `name` of the target `fluent`.
+ |      :return: `True` if the `fluent` with the given `name` is in the `problem`,
+ |          `False` otherwise.
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from unified_planning.model.mixins.fluents_set.FluentsSetMixin:
+ |  
+ |  fflluueennttss
+ |      Returns the `fluents` currently in the `problem`.
+ |  
+ |  fflluueennttss__ddeeffaauullttss
+ |      Returns the `problem's fluents defaults`.
+ |  
+ |  iinniittiiaall__ddeeffaauullttss
+ |      Returns the `problem's fluents defaults` for each `type`.
+ |  
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from unified_planning.model.mixins.actions_set.ActionsSetMixin:
+ |  
+ |  aaccttiioonn(self, name: str) -> 'up.model.action.Action'
+ |      Returns the `action` with the given `name`.
+ |      
+ |      :param name: The `name` of the target `action`.
+ |      :return: The `action` in the `problem` with the given `name`.
+ |  
+ |  aadddd__aaccttiioonn(self, action: 'up.model.action.Action')
+ |      Adds the given `action` to the `problem`.
+ |      
+ |      :param action: The `action` that must be added to the `problem`.
+ |  
+ |  aadddd__aaccttiioonnss(self, actions: List[ForwardRef('up.model.action.Action')])
+ |      Adds the given `actions` to the `problem`.
+ |      
+ |      :param actions: The `list` of `actions` that must be added to the `problem`.
+ |  
+ |  cclleeaarr__aaccttiioonnss(self)
+ |      Removes all the `Problem` `Actions`.
+ |  
+ |  hhaass__aaccttiioonn(self, name: str) -> bool
+ |      Returns `True` if the `problem` has the `action` with the given `name`,
+ |      `False` otherwise.
+ |      
+ |      :param name: The `name` of the target `action`.
+ |      :return: `True` if the `problem` has an `action` with the given `name`, `False` otherwise.
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from unified_planning.model.mixins.actions_set.ActionsSetMixin:
+ |  
+ |  aaccttiioonnss
+ |      Returns the list of the `Actions` in the `Problem`.
+ |  
+ |  ccoonnddiittiioonnaall__aaccttiioonnss
+ |      Returns the `conditional Actions`.
+ |      
+ |      IMPORTANT NOTE: this property does some computation, so it should be called as
+ |      seldom as possible.
+ |  
+ |  dduurraattiivvee__aaccttiioonnss
+ |      Returns all the `DurativeActions` of the `Problem`.
+ |      
+ |      IMPORTANT NOTE: this property does some computation, so it should be called as
+ |      seldom as possible.
+ |  
+ |  iinnssttaannttaanneeoouuss__aaccttiioonnss
+ |      Returns all the `InstantaneousActions` of the `Problem`.
+ |      
+ |      IMPORTANT NOTE: this property does some computation, so it should be called as
+ |      seldom as possible.
+ |  
+ |  uunnccoonnddiittiioonnaall__aaccttiioonnss
+ |      Returns the `unconditional Actions`.
+ |      
+ |      IMPORTANT NOTE: this property does some computation, so it should be called as
+ |      seldom as possible.
+ |  
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from unified_planning.model.mixins.objects_set.ObjectsSetMixin:
+ |  
+ |  aadddd__oobbjjeecctt(self, obj_or_name: Union[ForwardRef('up.model.object.Object'), str], typename: Union[ForwardRef('up.model.types.Type'), NoneType] = None) -> 'up.model.object.Object'
+ |      Add the given `object` to the `problem`, constructing it from the `parameters` if needed.
+ |      
+ |      :param obj_or_name: Either an `Object` instance or a `string` containing the `name` of the `object`.
+ |      :param typename: If the first argument contains only the `name` of the `object`, this parameter should contain
+ |                       its `type`, to allow creating the `object`.
+ |      :return: The `Object` that was passed or constructed.
+ |      
+ |      Examples
+ |      --------
+ |      >>> from unified_planning.shortcuts import *
+ |      >>> problem = Problem()
+ |      >>> cup = UserType("Cup")
+ |      >>> o1 = Object("o1", cup)  # creates a new object o1
+ |      >>> problem.add_object(o1)  # adds it to the problem
+ |      o1
+ |      >>> o2 = problem.add_object("o2", cup)  # alternative syntax to create a new object and add it to the problem.
+ |  
+ |  aadddd__oobbjjeeccttss(self, objects: List[ForwardRef('up.model.object.Object')])
+ |      Adds the given `objects` to the `problem`.
+ |      
+ |      :param objects: The `list` of `objects` that must be added to the `problem`.
+ |  
+ |  hhaass__oobbjjeecctt(self, name: str) -> bool
+ |      Returns `True` if the `object` with the given `name` is in the `problem`,
+ |      `False` otherwise.
+ |      
+ |      :param name: The `name` of the target `object` in the `problem`.
+ |      :return: `True` if an `object` with the given `name` is in the `problem`,
+ |              `False` otherwise.
+ |  
+ |  oobbjjeecctt(self, name: str) -> 'up.model.object.Object'
+ |      Returns the `object` with the given `name`.
+ |      
+ |      :param name: The `name` of the target `object` in the `problem`.
+ |  
+ |  oobbjjeeccttss(self, typename: 'up.model.types.Type') -> Iterator[ForwardRef('up.model.object.Object')]
+ |      Returns the `objects` compatible with the given `Type`: this includes the given
+ |      `type` and its heirs.
+ |      
+ |      :param typename: The target `type` of the `objects` that are retrieved.
+ |      :return: A generator of all the `objects` in the `problem` that are compatible with the
+ |          given `type`.
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from unified_planning.model.mixins.objects_set.ObjectsSetMixin:
+ |  
+ |  aallll__oobbjjeeccttss
+ |      Returns the `list` containing all the `objects` in the `problem`.
