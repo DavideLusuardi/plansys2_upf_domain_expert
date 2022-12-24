@@ -2,12 +2,13 @@ import unified_planning as up
 from unified_planning.io import PDDLReader, PDDLWriter
 from unified_planning.model.action import InstantaneousAction
 from unified_planning.model.operators import OperatorKind
+from unified_planning.model import timing
 # from plansys2_msgs import msg
 
 
 reader = PDDLReader()
 domain = reader.parse_problem(
-    '/home/davide/plansys2_ws/src/plansys2_upf_domain_expert/tmp/domain.pddl', None)
+    '/home/davide/plansys2_ws/src/plansys2_upf_domain_expert/tmp/domain2.pddl', None)
 
 # print(domain.name)
 # print(domain.user_types[0].name)
@@ -49,12 +50,22 @@ domain = reader.parse_problem(
 #     print(a.effects)
 
 
-instantaneous_actions = list(filter(lambda a: isinstance(a, InstantaneousAction), domain.actions))
-action = instantaneous_actions[0]
-p = list(action.parameters)[0]
-# print(p.type)
-# print(p.type.father)
-for type in domain.user_types:
-    # print(type.father)
-    if type.father == p.type:
-        print(type)
+# instantaneous_actions = list(filter(lambda a: isinstance(a, InstantaneousAction), domain.actions))
+# action = instantaneous_actions[0]
+# p = list(action.parameters)[0]
+# # print(p.type)
+# # print(p.type.father)
+# for type in domain.user_types:
+#     # print(type.father)
+#     if type.father == p.type:
+#         print(type)
+
+
+at_start = timing.TimeInterval(timing.TimepointKind.START, timing.TimepointKind.GLOBAL_END, is_right_open=True)
+print(at_start)
+print(list(domain.durative_actions)[0].effects)
+for time, effects in list(domain.durative_actions)[0].effects.items():
+    print(time == timing.StartTiming())
+    print(time)
+    print(effects)
+    print(effects[0].condition)

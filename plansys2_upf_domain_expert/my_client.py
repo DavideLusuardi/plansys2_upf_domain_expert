@@ -233,9 +233,9 @@ class MinimalClientAsync(Node):
         response_cpp = future.result()
         if response.action != response_cpp.action:
             print("========================================")
-            print(response.action.effects)
+            print(response.action)
             print("========================================")
-            print(response_cpp.action.effects)
+            print(response_cpp.action)
             print("========================================")
             print("error get_action_details")
         else:
@@ -251,6 +251,22 @@ class MinimalClientAsync(Node):
         future = self.get_durative_actions_client.call_async(request)
         rclpy.spin_until_future_complete(self, future)
         response = future.result()
+
+        while not self.get_durative_actions_client_cpp.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('service2 not available, waiting again...')
+        future = self.get_durative_actions_client_cpp.call_async(request)
+        rclpy.spin_until_future_complete(self, future)
+        response_cpp = future.result()
+        if response.actions != response_cpp.actions:
+            print("========================================")
+            print(response.actions)
+            print("========================================")
+            print(response_cpp.actions)
+            print("========================================")
+            print("error get_durative_actions")
+        else:
+            print(response.actions)
+
         return response.actions
 
     def getDurativeAction(self, action: str, parameters: List[str]):
@@ -263,6 +279,30 @@ class MinimalClientAsync(Node):
         future = self.get_durative_action_details_client.call_async(request)
         rclpy.spin_until_future_complete(self, future)
         response = future.result()
+
+        while not self.get_durative_action_details_client_cpp.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('service2 not available, waiting again...')
+        future = self.get_durative_action_details_client_cpp.call_async(request)
+        rclpy.spin_until_future_complete(self, future)
+        response_cpp = future.result()
+        if response.durative_action != response_cpp.durative_action:
+            print("========================================")
+            # print(f"at_start_requirements: {response.durative_action.at_start_requirements}")
+            # print(f"at_end_requirements: {response.durative_action.at_end_requirements}")
+            # print(f"over_all_requirements: {response.durative_action.over_all_requirements}")
+            print(f"at_start_effects: {response.durative_action.at_start_effects}")
+            print(f"at_end_effects: {response.durative_action.at_end_effects}")
+            print("========================================")
+            # print(f"at_start_requirements: {response_cpp.durative_action.at_start_requirements}")
+            # print(f"at_end_requirements: {response_cpp.durative_action.at_end_requirements}")
+            # print(f"over_all_requirements: {response_cpp.durative_action.over_all_requirements}")
+            print(f"at_start_effects: {response_cpp.durative_action.at_start_effects}")
+            print(f"at_end_effects: {response_cpp.durative_action.at_end_effects}")
+            print("========================================")
+            print("error get_durative_action_details")
+        else:
+            print(response.durative_action)
+
         return response.durative_action
 
     def getPredicates(self):
@@ -273,6 +313,22 @@ class MinimalClientAsync(Node):
         future = self.get_predicates_client.call_async(request)
         rclpy.spin_until_future_complete(self, future)
         response = future.result()
+
+        while not self.get_predicates_client_cpp.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('service2 not available, waiting again...')
+        future = self.get_predicates_client_cpp.call_async(request)
+        rclpy.spin_until_future_complete(self, future)
+        response_cpp = future.result()
+        if response.states != response_cpp.states:
+            print("========================================")
+            print(response.states)
+            print("========================================")
+            print(response_cpp.states)
+            print("========================================")
+            print("error get_predicates")
+        else:
+            print(response.states)
+
         return response.states
 
     def getPredicate(self, predicate: str):
@@ -284,6 +340,22 @@ class MinimalClientAsync(Node):
         future = self.get_predicate_details_client.call_async(request)
         rclpy.spin_until_future_complete(self, future)
         response = future.result()
+
+        while not self.get_predicate_details_client_cpp.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('service2 not available, waiting again...')
+        future = self.get_predicate_details_client_cpp.call_async(request)
+        rclpy.spin_until_future_complete(self, future)
+        response_cpp = future.result()
+        if response.node != response_cpp.node:
+            print("========================================")
+            print(response.node)
+            print("========================================")
+            print(response_cpp.node)
+            print("========================================")
+            print("error get_predicate_details")
+        else:
+            print(response.node)
+
         return response.node
 
     def getFunctions(self):
@@ -294,6 +366,22 @@ class MinimalClientAsync(Node):
         future = self.get_functions_client.call_async(request)
         rclpy.spin_until_future_complete(self, future)
         response = future.result()
+
+        while not self.get_functions_client_cpp.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('service2 not available, waiting again...')
+        future = self.get_functions_client_cpp.call_async(request)
+        rclpy.spin_until_future_complete(self, future)
+        response_cpp = future.result()
+        if response.states != response_cpp.states:
+            print("========================================")
+            print(response.states)
+            print("========================================")
+            print(response_cpp.states)
+            print("========================================")
+            print("error get_functions")
+        else:
+            print(response.states)
+
         return response.states
 
     def getFunction(self, function: str):
@@ -305,6 +393,22 @@ class MinimalClientAsync(Node):
         future = self.get_function_details_client.call_async(request)
         rclpy.spin_until_future_complete(self, future)
         response = future.result()
+
+        while not self.get_function_details_client_cpp.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('service2 not available, waiting again...')
+        future = self.get_function_details_client_cpp.call_async(request)
+        rclpy.spin_until_future_complete(self, future)
+        response_cpp = future.result()
+        if response.node != response_cpp.node:
+            print("========================================")
+            print(response.node)
+            print("========================================")
+            print(response_cpp.node)
+            print("========================================")
+            print("error get_function_details")
+        else:
+            print(response.node)
+
         return response.node
 
 
@@ -347,7 +451,13 @@ def main():
     # minimal_client.getTypes()
     # minimal_client.getConstants("counter")
     # minimal_client.getActions()
-    minimal_client.getAction("test_action", [])
+    # minimal_client.getAction("test_action", [])
+    # minimal_client.getDurativeActions()
+    minimal_client.getDurativeAction("move", [])
+    # minimal_client.getPredicates()
+    # minimal_client.getPredicate("robot_at")
+    # minimal_client.getFunctions()
+    # minimal_client.getFunction("test_fn")
 
     minimal_client.destroy_node()
     rclpy.shutdown()

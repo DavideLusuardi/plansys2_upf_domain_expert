@@ -5,6 +5,7 @@ from unified_planning.io import PDDLReader
 from unified_planning.model.action import InstantaneousAction
 from unified_planning.model.operators import OperatorKind
 from unified_planning.model.effect import EffectKind
+from unified_planning.model import timing
 
 from typing import List, Dict
 
@@ -189,24 +190,23 @@ class DomainExpert():
 
     def getAction(self, action: str, parameters: List[str]):
         instantaneous_actions = filter(lambda a: isinstance(a, InstantaneousAction), self.domain.actions)
-        for a in instantaneous_actions:
-            if a.name == action:
+        for action in instantaneous_actions:
+            if action.name == action:
                 action_msg = msg.Action()
-                action_msg.name = a.name
+                action_msg.name = action.name
                 
-                action_msg.parameters = list()
-                params_map = dict([(p.name, parameters[i] if i<len(parameters) else f'?{i}') for i,p in enumerate(a.parameters)])
-                action_msg.parameters = self.constructParameters(a.parameters, params_map)
+                params_map = dict([(p.name, parameters[i] if i<len(parameters) else f'?{i}') for i,p in enumerate(action.parameters)])
+                action_msg.parameters = self.constructParameters(action.parameters, params_map)
                 
                 action_msg.preconditions = msg.Tree()
                 action_msg.preconditions.nodes = list()
-                for precondition in a.preconditions: # TODO: check if correct, can we have many preconditions?
+                for precondition in action.preconditions: # TODO: check if correct, can we have many preconditions?
                     print("======precondition=========")
                     self.constructTree(precondition, action_msg.preconditions.nodes, params_map)
 
                 action_msg.effects = msg.Tree()
                 action_msg.effects.nodes = list()
-                self.constructEffectsTree(a.effects, action_msg.effects.nodes, params_map)
+                self.constructEffectsTree(action.effects, action_msg.effects.nodes, params_map)
                 
                 return action_msg
 
@@ -217,28 +217,34 @@ class DomainExpert():
 
     # TODO: to conclude
     def getDurativeAction(self, action: str, parameters: List[str]):
-        for a in self.domain.durative_actions:
-            if a.name == action:
+        for durative_action in self.domain.durative_actions:
+            if durative_action.name == action:
                 durative_action_msg = msg.DurativeAction()
-                durative_action_msg.name = a.name
+                durative_action_msg.name = durative_action.name
                 
-                durative_action_msg.parameters = list()
-                for param in a.parameters:
-                    param_msg = msg.Param()
-                    param_msg.name = param.name
-                    param_msg.type = param.type.name
-                    
-                    sub_types = filter(lambda ut: ut.father == param.type, self.domain.user_types)
-                    param_msg.sub_types = list(map(lambda ut: ut.name, sub_types))
+                params_map = dict([(p.name, parameters[i] if i<len(parameters) else f'?{i}') for i,p in enumerate(durative_action.parameters)])
+                durative_action_msg.parameters = self.constructParameters(durative_action.parameters, params_map)
 
-                    durative_action_msg.parameters.append(param_msg)
+                # TODO: add and-node at top of the tree
+                for time_interval, conditions in durative_action.conditions.items():
+                    if time_interval.lower == timing.StartTiming() and time_interval.upper == timing.EndTiming():
+                        for condition in conditions:
+                            self.constructTree(condition, durative_action_msg.over_all_requirements.nodes, params_map)
+
+                    elif time_interval.lower == timing.StartTiming():
+                        for condition in conditions:
+                            self.constructTree(condition, durative_action_msg.at_start_requirements.nodes, params_map)
+
+                    elif time_interval.upper == timing.EndTiming():
+                        for condition in conditions:
+                            self.constructTree(condition, durative_action_msg.at_end_requirements.nodes, params_map)
                 
-                durative_action_msg.at_start_requirements = msg.Tree()
-                durative_action_msg.at_start_requirements.nodes = list()
-                for time_interval, conditions in a.conditions.items():
-                    for condition in conditions:
-                        self.constructTree(condition, durative_action_msg.at_start_requirements.nodes)
-                
+                for time, effects in durative_action.effects.items():
+                    if time == timing.StartTiming():
+                        self.constructEffectsTree(effects, durative_action_msg.at_start_effects.nodes, params_map)
+                    else:
+                        self.constructEffectsTree(effects, durative_action_msg.at_end_effects.nodes, params_map)
+
                 return durative_action_msg
 
         return None
@@ -258,12 +264,13 @@ class DomainExpert():
         for p in predicates:
             if p.name == predicate:
                 pred = msg.Node()
-                pred.node_type = msg.Node.PREDICATE
+                pred.node_type = msg.Node.PREDICATE # TODO: plansys2 sets UNKNOWN
                 pred.name = p.name
                 pred.parameters = list()
-                for param in p.signature:
+                for i, param in enumerate(p.signature):
                     param_msg = msg.Param()
-                    param_msg.name = param.name
+                    # param_msg.name = param.name
+                    param_msg.name = f"?{param.type}{i}"
                     param_msg.type = param.type.name
                     
                     sub_types = filter(lambda ut: ut.father == param.type, self.domain.user_types)
@@ -294,9 +301,10 @@ class DomainExpert():
                 func.node_type = msg.Node.FUNCTION
                 func.name = f.name
                 func.parameters = list()
-                for param in f.signature:
+                for i, param in enumerate(f.signature):
                     param_msg = msg.Param()
-                    param_msg.name = param.name
+                    # param_msg.name = param.name
+                    param_msg.name = f"?{param.type}{i}"
                     param_msg.type = param.type.name
                     
                     sub_types = filter(lambda ut: ut.father == param.type, self.domain.user_types)
