@@ -1,4 +1,4 @@
-from plansys2_msgs import srv, msg
+from plansys2_msgs import srv
 from lifecycle_msgs.srv import GetState, ChangeState
 from lifecycle_msgs.msg import Transition
 import rclpy
@@ -6,7 +6,6 @@ from rclpy.node import Node
 
 from typing import List
 
-# TODO: manage errors
 
 class MinimalClientAsync(Node):
 
@@ -116,7 +115,6 @@ class MinimalClientAsync(Node):
         rclpy.spin_until_future_complete(self, future)
         response = future.result()
         print(f"response2: {response}")
-
 
     def getDomain(self):
         while not self.get_domain_client.wait_for_service(timeout_sec=1.0):
@@ -488,7 +486,7 @@ def main():
     # minimal_client.getActions()
     # minimal_client.getAction("test_action", [])
     # minimal_client.getDurativeActions()
-    minimal_client.getDurativeAction("move", [])
+    # minimal_client.getDurativeAction("move", [])
     # minimal_client.getPredicates()
     # minimal_client.getPredicate("robot_at")
     # minimal_client.getFunctions()

@@ -11,7 +11,7 @@ class DomainExpertNode(Node):
 
     def __init__(self):
         super().__init__('domain_expert')
-        
+
         self.domain_expert = None
         self.state = State.PRIMARY_STATE_UNCONFIGURED
         self.declare_parameter("model_file", "")
@@ -46,13 +46,12 @@ class DomainExpertNode(Node):
         self.create_service(srv.GetNodeDetails, 'domain_expert_upf/get_domain_function_details',
                             self.get_domain_function_details_service_callback)
 
-
     def get_state_service_callback(self, request, response):
         response.current_state = State()
         response.current_state.id = self.state
         # response.current_state.label = "" # TODO
         return response
-    
+
     def change_state_service_callback(self, request, response):
         transition_callback = {
             Transition.TRANSITION_CONFIGURE: self.on_configure,
@@ -77,7 +76,8 @@ class DomainExpertNode(Node):
 
     def on_configure(self):
         self.get_logger().info(f"[{self.get_name()}] Configuring...")
-        model_file = self.get_parameter("model_file").get_parameter_value().string_value
+        model_file = self.get_parameter(
+            "model_file").get_parameter_value().string_value
         try:
             self.domain_expert = DomainExpert(model_file)
             self.state = State.PRIMARY_STATE_INACTIVE
@@ -124,7 +124,7 @@ class DomainExpertNode(Node):
 
     def get_domain_service_callback(self, request, response):
         self.get_logger().info(f'get_domain::Incoming request: {request}')
-        
+
         if self.domain_expert is None:
             self.get_logger().error("Requesting service in non-active state")
             response.error_info = "Requesting service in non-active state"
@@ -136,7 +136,7 @@ class DomainExpertNode(Node):
 
     def get_domain_name_service_callback(self, request, response):
         self.get_logger().info(f'get_domain_name::Incoming request: {request}')
-        
+
         if self.domain_expert is None:
             self.get_logger().error("Requesting service in non-active state")
             response.error_info = "Requesting service in non-active state"
@@ -149,7 +149,7 @@ class DomainExpertNode(Node):
     def get_domain_types_service_callback(self, request, response):
         self.get_logger().info(
             f'get_domain_types::Incoming request: {request}')
-        
+
         if self.domain_expert is None:
             self.get_logger().error("Requesting service in non-active state")
             response.error_info = "Requesting service in non-active state"
@@ -193,7 +193,8 @@ class DomainExpertNode(Node):
             response.error_info = "Requesting service in non-active state"
             response.success = False
         else:
-            action = self.domain_expert.getAction(request.action, request.parameters)
+            action = self.domain_expert.getAction(
+                request.action, request.parameters)
             if action is None:
                 self.get_logger().warn(
                     f'Requesting a non-existing action [{request.action}]')
@@ -220,7 +221,7 @@ class DomainExpertNode(Node):
     def get_domain_durative_action_details_service_callback(self, request, response):
         self.get_logger().info(
             f'get_domain_durative_action_details::Incoming request: {request}')
-        
+
         if self.domain_expert is None:
             self.get_logger().error("Requesting service in non-active state")
             response.error_info = "Requesting service in non-active state"
@@ -241,7 +242,7 @@ class DomainExpertNode(Node):
     def get_domain_predicates_service_callback(self, request, response):
         self.get_logger().info(
             f'get_domain_predicates::Incoming request: {request}')
-        
+
         if self.domain_expert is None:
             self.get_logger().error("Requesting service in non-active state")
             response.error_info = "Requesting service in non-active state"
