@@ -13,8 +13,12 @@ from typing import List, Dict
 class DomainExpert():
 
     def __init__(self, domain_filename: str):
-        self.domain_filename = domain_filename
         self.domain = PDDLReader().parse_problem(domain_filename, None)
+        
+        self.domain_pddl = None 
+        with open(domain_filename) as f:
+            ll = f.readlines()
+            self.domain_pddl = ''.join(ll)
         
         # TODO: fix the mapping, there are some UnsupportedConstruct
         self.map_types = {
@@ -63,15 +67,10 @@ class DomainExpert():
             EffectKind.DECREASE         : msg.Node.DECREASE,
         }
 
-
+    # TODO
     def getDomain(self):
         # return str(self.domain)
-
-        with open(self.domain_filename) as f:
-            ll = f.readlines()
-            return ''.join(ll)
-
-        return None
+        return self.domain_pddl
 
     def getName(self) -> str:
         return self.domain.name
@@ -79,6 +78,7 @@ class DomainExpert():
     def getTypes(self):
         return list(map(lambda t: t.name, self.domain.user_types))
 
+    # TODO: check if type is valid
     def getConstants(self, type: str):
         # return self.objects(type)
         constants = filter(lambda o: o.type.name == type, self.domain._objects)
@@ -215,7 +215,6 @@ class DomainExpert():
     def getDurativeActions(self):
         return list(map(lambda a: a.name, self.domain.durative_actions))
 
-    # TODO: to conclude
     def getDurativeAction(self, action: str, parameters: List[str]):
         for durative_action in self.domain.durative_actions:
             if durative_action.name == action:
@@ -315,12 +314,6 @@ class DomainExpert():
                 return func
 
         return None
-
-        # if self.domain.has_fluent(function):
-        #     f = self.domain.fluent(function)
-        #     if f.type.is_real_type():
-        #         return f
-        # return None
 
 
 if __name__ == '__main__':

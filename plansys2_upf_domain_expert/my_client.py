@@ -63,25 +63,60 @@ class MinimalClientAsync(Node):
         self.get_function_details_client_cpp = self.create_client(
             srv.GetNodeDetails, 'domain_expert/get_domain_function_details')
 
+        self.de_get_state_service = self.create_client(
+            GetState, 'domain_expert_upf/get_state')
+        self.de_change_state_service = self.create_client(
+            ChangeState, 'domain_expert_upf/change_state')
         self.de_get_state_service_cpp = self.create_client(
             GetState, 'domain_expert/get_state')
         self.de_change_state_service_cpp = self.create_client(
             ChangeState, 'domain_expert/change_state')
 
+        self.get_state()
         self.change_state(Transition.TRANSITION_CONFIGURE)
+        self.get_state()
         self.change_state(Transition.TRANSITION_ACTIVATE)
+        self.get_state()
 
+    def get_state(self):
+        request = GetState.Request()
+
+        while not self.de_get_state_service_cpp.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('service not available, waiting again...')
+
+        future = self.de_get_state_service_cpp.call_async(request)
+        rclpy.spin_until_future_complete(self, future)
+        response = future.result()
+        print(f"response: {response}")
+
+        while not self.de_get_state_service.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('service2 not available, waiting again...')
+
+        future = self.de_get_state_service.call_async(request)
+        rclpy.spin_until_future_complete(self, future)
+        response = future.result()
+        print(f"response2: {response}")
 
     def change_state(self, transition):
+        request = ChangeState.Request()
+        request.transition.id = transition
+
         while not self.de_change_state_service_cpp.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('service not available, waiting again...')
 
-        request = ChangeState.Request()
-        request.transition.id = transition
         future = self.de_change_state_service_cpp.call_async(request)
         rclpy.spin_until_future_complete(self, future)
         response = future.result()
         print(f"response: {response}")
+
+        while not self.de_change_state_service.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('service2 not available, waiting again...')
+
+        future = self.de_change_state_service.call_async(request)
+        rclpy.spin_until_future_complete(self, future)
+        response = future.result()
+        print(f"response2: {response}")
+
 
     def getDomain(self):
         while not self.get_domain_client.wait_for_service(timeout_sec=1.0):
