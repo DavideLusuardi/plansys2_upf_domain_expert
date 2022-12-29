@@ -115,12 +115,6 @@ class DomainExpertNode(Node):
         self.get_logger().error(f"[{self.get_name()}] Error transition")
         return True
 
-    # def ghkds(self, response):
-    #     if self.domain_expert is None:
-    #         response.success = False
-    #         response.error_info = "Requesting service in non-active state"
-    #         self.get_logger().error("Requesting service in non-active state")
-    #         return False
 
     def get_domain_service_callback(self, request, response):
         self.get_logger().info(f'get_domain::Incoming request: {request}')

@@ -6,6 +6,7 @@ from unified_planning.model.action import InstantaneousAction
 from unified_planning.model.operators import OperatorKind
 from unified_planning.model.effect import EffectKind
 from unified_planning.model import timing
+from unified_planning.model.parameter import Parameter
 
 from typing import List, Dict
 
@@ -93,7 +94,7 @@ class DomainExpert():
         params_msg = list()
         for param in parameters:
             param_msg = msg.Param()
-            param_msg.name = params_map[param.name]
+            param_msg.name = param.name if params_map is None else params_map[param.name]
             param_msg.type = param.type.name
             
             sub_types = filter(lambda ut: ut.father == param.type, self.domain.user_types)
@@ -127,7 +128,8 @@ class DomainExpert():
 
         
         if fnode.node_type == OperatorKind.FLUENT_EXP:
-            # TODO: are there only predicates and functions? Actions?
+            print(f"fluent type: {fnode.fluent().type}\n")
+            # TODO: are there only predicates and functions?
             if fnode.fluent().type.is_bool_type():
                 node.node_type = msg.Node.PREDICATE
             else:
@@ -137,8 +139,12 @@ class DomainExpert():
 
             parameters = list()
             for child_fnode in fnode.args:
-                assert(child_fnode.is_parameter_exp()) # TODO
-                parameters.append(child_fnode.parameter())
+                if child_fnode.is_parameter_exp():
+                    parameters.append(child_fnode.parameter())
+                elif child_fnode.is_object_exp():
+                    parameters.append(child_fnode.object())
+                else:
+                    raise # TODO
             node.parameters = self.constructParameters(parameters, params_map) # TODO: reuse previously constructed parameters
 
         else:
@@ -260,24 +266,27 @@ class DomainExpert():
 
     def getPredicate(self, predicate: str):
         predicates = filter(lambda f: f.type.is_bool_type(), self.domain.fluents)
-        for p in predicates:
-            if p.name == predicate:
-                pred = msg.Node()
-                pred.node_type = msg.Node.PREDICATE # TODO: plansys2 sets UNKNOWN
-                pred.name = p.name
-                pred.parameters = list()
-                for i, param in enumerate(p.signature):
-                    param_msg = msg.Param()
-                    # param_msg.name = param.name
-                    param_msg.name = f"?{param.type}{i}"
-                    param_msg.type = param.type.name
+        for predicate in predicates:
+            if predicate.name == predicate:
+                predicate_msg = msg.Node()
+                predicate_msg.node_type = msg.Node.PREDICATE # TODO: plansys2 sets UNKNOWN
+                predicate_msg.name = predicate.name
+                # predicate_msg.parameters = list()
+                # for i, param in enumerate(predicate.signature):
+                #     param_msg = msg.Param()
+                #     # param_msg.name = param.name
+                #     param_msg.name = f"?{param.type}{i}"
+                #     param_msg.type = param.type.name
                     
-                    sub_types = filter(lambda ut: ut.father == param.type, self.domain.user_types)
-                    param_msg.sub_types = list(map(lambda ut: ut.name, sub_types))
+                #     sub_types = filter(lambda ut: ut.father == param.type, self.domain.user_types)
+                #     param_msg.sub_types = list(map(lambda ut: ut.name, sub_types))
 
-                    pred.parameters.append(param_msg)
+                #     predicate_msg.parameters.append(param_msg)
 
-                return pred
+                params_map = dict([(p.name, f"?{p.type}{i}") for i,p in enumerate(predicate.signature)])
+                predicate_msg.parameters = self.constructParameters(predicate.signature, params_map)
+
+                return predicate_msg
 
         return None
 
@@ -294,27 +303,27 @@ class DomainExpert():
 
     def getFunction(self, function: str):
         functions = filter(lambda f: f.type.is_real_type(), self.domain.fluents)
-        for f in functions:
-            if f.name == function:
-                func = msg.Node()
-                func.node_type = msg.Node.FUNCTION
-                func.name = f.name
-                func.parameters = list()
-                for i, param in enumerate(f.signature):
-                    param_msg = msg.Param()
-                    # param_msg.name = param.name
-                    param_msg.name = f"?{param.type}{i}"
-                    param_msg.type = param.type.name
+        for function in functions:
+            if function.name == function:
+                function_msg = msg.Node()
+                function_msg.node_type = msg.Node.FUNCTION
+                function_msg.name = function.name
+                # function_msg.parameters = list()
+                # for i, param in enumerate(function.signature):
+                #     param_msg = msg.Param()
+                #     # param_msg.name = param.name
+                #     param_msg.name = function"?{param.type}{i}"
+                #     param_msg.type = param.type.name
                     
-                    sub_types = filter(lambda ut: ut.father == param.type, self.domain.user_types)
-                    param_msg.sub_types = list(map(lambda ut: ut.name, sub_types))
+                #     sub_types = filter(lambda ut: ut.father == param.type, self.domain.user_types)
+                #     param_msg.sub_types = list(map(lambda ut: ut.name, sub_types))
 
-                    func.parameters.append(param_msg)
+                #     function_msg.parameters.append(param_msg)
                 
-                return func
+                params_map = dict([(p.name, f"?{p.type}{i}") for i,p in enumerate(function.signature)])
+                function_msg.parameters = self.constructParameters(function.signature, params_map)
+
+                return function_msg
 
         return None
 
-
-if __name__ == '__main__':
-    pass

@@ -71,13 +71,13 @@ class MinimalClientAsync(Node):
         self.de_change_state_service_cpp = self.create_client(
             ChangeState, 'domain_expert/change_state')
 
-        self.get_state()
-        self.change_state(Transition.TRANSITION_CONFIGURE)
-        self.get_state()
-        self.change_state(Transition.TRANSITION_ACTIVATE)
-        self.get_state()
+        self.getState()
+        self.changeState(Transition.TRANSITION_CONFIGURE)
+        self.getState()
+        self.changeState(Transition.TRANSITION_ACTIVATE)
+        self.getState()
 
-    def get_state(self):
+    def getState(self):
         request = GetState.Request()
 
         while not self.de_get_state_service_cpp.wait_for_service(timeout_sec=1.0):
@@ -96,7 +96,7 @@ class MinimalClientAsync(Node):
         response = future.result()
         print(f"response2: {response}")
 
-    def change_state(self, transition):
+    def changeState(self, transition):
         request = ChangeState.Request()
         request.transition.id = transition
 
