@@ -8,7 +8,7 @@ from unified_planning.model.effect import EffectKind
 from unified_planning.model import timing
 from unified_planning.model.parameter import Parameter
 
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 
 class DomainExpert():
@@ -90,7 +90,7 @@ class DomainExpert():
         # instantaneous_actions = set(self.domain.actions) - set(self.domain.durative_actions)
         return list(map(lambda a: a.name, instantaneous_actions))
 
-    def constructParameters(self, parameters: List[up.model.Parameter], params_map: Dict[str, str]):
+    def constructParameters(self, parameters: List[up.model.Parameter], params_map: Optional[Dict[str, str]] = None):
         params_msg = list()
         for param in parameters:
             param_msg = msg.Param()
@@ -104,7 +104,7 @@ class DomainExpert():
         
         return params_msg
 
-    def constructTree(self, fnode: up.model.fnode.FNode, nodes: List[msg.Node], params_map: Dict[str, str]) -> msg.Node:
+    def constructTree(self, fnode: up.model.fnode.FNode, nodes: List[msg.Node], params_map: Optional[Dict[str, str]] = None) -> msg.Node:
         print(f"fnode: {fnode}")
         print(f"node type: {fnode.node_type}")
         print(f"node id: {fnode.node_id}")
@@ -194,14 +194,14 @@ class DomainExpert():
                 value_node = self.constructTree(effect.value, nodes, params_map)
                 node.children = [fluent_node.node_id, value_node.node_id]
 
-    def getAction(self, action: str, parameters: List[str]):
+    def getAction(self, action_name: str, parameters: List[str]):
         instantaneous_actions = filter(lambda a: isinstance(a, InstantaneousAction), self.domain.actions)
         for action in instantaneous_actions:
-            if action.name == action:
+            if action.name == action_name:
                 action_msg = msg.Action()
                 action_msg.name = action.name
                 
-                params_map = dict([(p.name, parameters[i] if i<len(parameters) else f'?{i}') for i,p in enumerate(action.parameters)])
+                params_map = dict([(p.name, parameters[i] if i<len(parameters) else f'?{p.type.name}{i}') for i,p in enumerate(action.parameters)])
                 action_msg.parameters = self.constructParameters(action.parameters, params_map)
                 
                 action_msg.preconditions = msg.Tree()
@@ -221,13 +221,13 @@ class DomainExpert():
     def getDurativeActions(self):
         return list(map(lambda a: a.name, self.domain.durative_actions))
 
-    def getDurativeAction(self, action: str, parameters: List[str]):
+    def getDurativeAction(self, action_name: str, parameters: List[str]):
         for durative_action in self.domain.durative_actions:
-            if durative_action.name == action:
+            if durative_action.name == action_name:
                 durative_action_msg = msg.DurativeAction()
                 durative_action_msg.name = durative_action.name
                 
-                params_map = dict([(p.name, parameters[i] if i<len(parameters) else f'?{i}') for i,p in enumerate(durative_action.parameters)])
+                params_map = dict([(p.name, parameters[i] if i<len(parameters) else f'?{p.type.name}{i}') for i,p in enumerate(durative_action.parameters)])
                 durative_action_msg.parameters = self.constructParameters(durative_action.parameters, params_map)
 
                 # TODO: add and-node at top of the tree
@@ -257,17 +257,18 @@ class DomainExpert():
     def getPredicates(self):
         predicates = filter(lambda f: f.type.is_bool_type(), self.domain.fluents)
         states = list()
-        for p in predicates:
+        for i, p in enumerate(predicates):
             pred = msg.Node()
             pred.node_type = msg.Node.PREDICATE
+            pred.node_id = i
             pred.name = p.name
             states.append(pred)
         return states
 
-    def getPredicate(self, predicate: str):
+    def getPredicate(self, predicate_name: str):
         predicates = filter(lambda f: f.type.is_bool_type(), self.domain.fluents)
         for predicate in predicates:
-            if predicate.name == predicate:
+            if predicate.name == predicate_name:
                 predicate_msg = msg.Node()
                 predicate_msg.node_type = msg.Node.PREDICATE # TODO: plansys2 sets UNKNOWN
                 predicate_msg.name = predicate.name
@@ -283,7 +284,7 @@ class DomainExpert():
 
                 #     predicate_msg.parameters.append(param_msg)
 
-                params_map = dict([(p.name, f"?{p.type}{i}") for i,p in enumerate(predicate.signature)])
+                params_map = dict([(p.name, f"?{p.type.name}{i}") for i,p in enumerate(predicate.signature)])
                 predicate_msg.parameters = self.constructParameters(predicate.signature, params_map)
 
                 return predicate_msg
@@ -294,17 +295,18 @@ class DomainExpert():
     def getFunctions(self):
         functions = filter(lambda f: f.type.is_real_type(), self.domain.fluents)
         states = list()
-        for f in functions:
+        for i, f in enumerate(functions):
             func = msg.Node()
             func.node_type = msg.Node.FUNCTION
+            func.node_id = i
             func.name = f.name
             states.append(func)
         return states
 
-    def getFunction(self, function: str):
+    def getFunction(self, function_name: str):
         functions = filter(lambda f: f.type.is_real_type(), self.domain.fluents)
         for function in functions:
-            if function.name == function:
+            if function.name == function_name:
                 function_msg = msg.Node()
                 function_msg.node_type = msg.Node.FUNCTION
                 function_msg.name = function.name
@@ -320,7 +322,7 @@ class DomainExpert():
 
                 #     function_msg.parameters.append(param_msg)
                 
-                params_map = dict([(p.name, f"?{p.type}{i}") for i,p in enumerate(function.signature)])
+                params_map = dict([(p.name, f"?{p.type.name}{i}") for i,p in enumerate(function.signature)])
                 function_msg.parameters = self.constructParameters(function.signature, params_map)
 
                 return function_msg
