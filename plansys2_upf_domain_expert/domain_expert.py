@@ -105,10 +105,10 @@ class DomainExpert():
         return params_msg
 
     def constructTree(self, fnode: up.model.fnode.FNode, nodes: List[msg.Node], params_map: Optional[Dict[str, str]] = None) -> msg.Node:
-        print(f"fnode: {fnode}")
-        print(f"node type: {fnode.node_type}")
-        print(f"node id: {fnode.node_id}")
-        print(f"args: {fnode.args}\n")
+        # print(f"fnode: {fnode}")
+        # print(f"node type: {fnode.node_type}")
+        # print(f"node id: {fnode.node_id}")
+        # print(f"args: {fnode.args}\n")
 
         node = msg.Node()
         # node.node_id = fnode.node_id # TODO
@@ -128,7 +128,7 @@ class DomainExpert():
 
         
         if fnode.node_type == OperatorKind.FLUENT_EXP:
-            print(f"fluent type: {fnode.fluent().type}\n")
+            # print(f"fluent type: {fnode.fluent().type}\n")
             # TODO: are there only predicates and functions?
             if fnode.fluent().type.is_bool_type():
                 node.node_type = msg.Node.PREDICATE
@@ -162,11 +162,11 @@ class DomainExpert():
         nodes.append(and_node)
 
         for effect in effects:
-            print("======effect=========")
-            print(f"effect: {effect}")
-            print(f"effect.fluent: {effect.fluent}")
-            print(f"effect.value: {effect.value}")
-            print(f"effect.kind: {effect.kind}")
+            # print("======effect=========")
+            # print(f"effect: {effect}")
+            # print(f"effect.fluent: {effect.fluent}")
+            # print(f"effect.value: {effect.value}")
+            # print(f"effect.kind: {effect.kind}")
             
             if effect.value.is_bool_constant():
                 node_parent = and_node
@@ -206,9 +206,15 @@ class DomainExpert():
                 
                 action_msg.preconditions = msg.Tree()
                 action_msg.preconditions.nodes = list()
+                and_node = msg.Node()
+                and_node.node_type = self.map_types[OperatorKind.AND]
+                and_node.children = list()
+                and_node.node_id = len(action_msg.preconditions.nodes)
+                action_msg.preconditions.nodes.append(and_node)
                 for precondition in action.preconditions: # TODO: check if correct, can we have many preconditions?
-                    print("======precondition=========")
-                    self.constructTree(precondition, action_msg.preconditions.nodes, params_map)
+                    # print("======precondition=========")
+                    node = self.constructTree(precondition, action_msg.preconditions.nodes, params_map)
+                    and_node.children.append(node.node_id)
 
                 action_msg.effects = msg.Tree()
                 action_msg.effects.nodes = list()
@@ -230,25 +236,49 @@ class DomainExpert():
                 params_map = dict([(p.name, parameters[i] if i<len(parameters) else f'?{p.type.name}{i}') for i,p in enumerate(durative_action.parameters)])
                 durative_action_msg.parameters = self.constructParameters(durative_action.parameters, params_map)
 
-                # TODO: add and-node at top of the tree
+                # ensure there is at least one and-node, plansys2 will give an error otherwise
+                and_nodes = list()
+                for requirements in [durative_action_msg.over_all_requirements, durative_action_msg.at_start_requirements, durative_action_msg.at_end_requirements]:
+                    and_node = msg.Node()
+                    and_node.node_type = self.map_types[OperatorKind.AND]
+                    and_node.children = list()
+                    and_node.node_id = len(requirements.nodes)
+                    requirements.nodes.append(and_node)
+                    and_nodes.append(and_node)
+
                 for time_interval, conditions in durative_action.conditions.items():
                     if time_interval.lower == timing.StartTiming() and time_interval.upper == timing.EndTiming():
+                        and_node = and_nodes[0]
                         for condition in conditions:
-                            self.constructTree(condition, durative_action_msg.over_all_requirements.nodes, params_map)
+                            node = self.constructTree(condition, durative_action_msg.over_all_requirements.nodes, params_map)
+                            and_node.children.append(node.node_id)
 
                     elif time_interval.lower == timing.StartTiming():
+                        and_node = and_nodes[1]
                         for condition in conditions:
-                            self.constructTree(condition, durative_action_msg.at_start_requirements.nodes, params_map)
+                            node = self.constructTree(condition, durative_action_msg.at_start_requirements.nodes, params_map)
+                            and_node.children.append(node.node_id)
 
                     elif time_interval.upper == timing.EndTiming():
+                        and_node = and_nodes[2]
                         for condition in conditions:
-                            self.constructTree(condition, durative_action_msg.at_end_requirements.nodes, params_map)
+                            node = self.constructTree(condition, durative_action_msg.at_end_requirements.nodes, params_map)
+                            and_node.children.append(node.node_id)
                 
                 for time, effects in durative_action.effects.items():
                     if time == timing.StartTiming():
                         self.constructEffectsTree(effects, durative_action_msg.at_start_effects.nodes, params_map)
                     else:
                         self.constructEffectsTree(effects, durative_action_msg.at_end_effects.nodes, params_map)
+
+                # ensure there is at least one and-node, plansys2 will give an error otherwise
+                for effects in [durative_action_msg.at_start_effects, durative_action_msg.at_end_effects]:
+                    if len(effects.nodes) == 0:
+                        and_node = msg.Node()
+                        and_node.node_type = self.map_types[OperatorKind.AND]
+                        and_node.children = list()
+                        and_node.node_id = len(effects.nodes)
+                        effects.nodes.append(and_node)
 
                 return durative_action_msg
 
@@ -272,17 +302,6 @@ class DomainExpert():
                 predicate_msg = msg.Node()
                 predicate_msg.node_type = msg.Node.PREDICATE # TODO: plansys2 sets UNKNOWN
                 predicate_msg.name = predicate.name
-                # predicate_msg.parameters = list()
-                # for i, param in enumerate(predicate.signature):
-                #     param_msg = msg.Param()
-                #     # param_msg.name = param.name
-                #     param_msg.name = f"?{param.type}{i}"
-                #     param_msg.type = param.type.name
-                    
-                #     sub_types = filter(lambda ut: ut.father == param.type, self.domain.user_types)
-                #     param_msg.sub_types = list(map(lambda ut: ut.name, sub_types))
-
-                #     predicate_msg.parameters.append(param_msg)
 
                 params_map = dict([(p.name, f"?{p.type.name}{i}") for i,p in enumerate(predicate.signature)])
                 predicate_msg.parameters = self.constructParameters(predicate.signature, params_map)
@@ -310,18 +329,7 @@ class DomainExpert():
                 function_msg = msg.Node()
                 function_msg.node_type = msg.Node.FUNCTION
                 function_msg.name = function.name
-                # function_msg.parameters = list()
-                # for i, param in enumerate(function.signature):
-                #     param_msg = msg.Param()
-                #     # param_msg.name = param.name
-                #     param_msg.name = function"?{param.type}{i}"
-                #     param_msg.type = param.type.name
-                    
-                #     sub_types = filter(lambda ut: ut.father == param.type, self.domain.user_types)
-                #     param_msg.sub_types = list(map(lambda ut: ut.name, sub_types))
 
-                #     function_msg.parameters.append(param_msg)
-                
                 params_map = dict([(p.name, f"?{p.type.name}{i}") for i,p in enumerate(function.signature)])
                 function_msg.parameters = self.constructParameters(function.signature, params_map)
 
