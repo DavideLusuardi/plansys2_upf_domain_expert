@@ -5,10 +5,13 @@ from unified_planning.io import PDDLReader
 from unified_planning.model.action import InstantaneousAction
 from unified_planning.model.operators import OperatorKind
 from unified_planning.model.effect import EffectKind
-from unified_planning.model import timing
+from unified_planning.model import timing, Fluent, types
 from unified_planning.model.parameter import Parameter
+from unified_planning.model.object import Object
 
 from typing import List, Dict, Optional
+
+from fractions import Fraction
 
 
 class DomainExpert():
@@ -68,27 +71,12 @@ class DomainExpert():
             EffectKind.DECREASE         : msg.Node.DECREASE,
         }
 
-    # TODO
-    def getDomain(self):
-        # return str(self.domain)
-        return self.domain_pddl
-
-    def getName(self) -> str:
-        return self.domain.name
-
-    def getTypes(self):
-        return list(map(lambda t: t.name, self.domain.user_types))
-
-    # TODO: check if type is valid
-    def getConstants(self, type: str):
-        # return self.objects(type)
-        constants = filter(lambda o: o.type.name == type, self.domain._objects)
-        return list(map(lambda c: c.name, constants))
-
-    def getActions(self):
-        instantaneous_actions = filter(lambda a: isinstance(a, InstantaneousAction), self.domain.actions)
-        # instantaneous_actions = set(self.domain.actions) - set(self.domain.durative_actions)
-        return list(map(lambda a: a.name, instantaneous_actions))
+        self.inverse_map = {
+            msg.Node.NUMBER             : OperatorKind.REAL_CONSTANT,
+            msg.Node.AND                : OperatorKind.AND,
+            msg.Node.OR                 : OperatorKind.OR,
+            msg.Node.NOT                : OperatorKind.NOT,
+        }
 
     def constructParameters(self, parameters: List[up.model.Parameter], params_map: Optional[Dict[str, str]] = None):
         params_msg = list()
@@ -193,6 +181,64 @@ class DomainExpert():
                 fluent_node = self.constructTree(effect.fluent, nodes, params_map)
                 value_node = self.constructTree(effect.value, nodes, params_map)
                 node.children = [fluent_node.node_id, value_node.node_id]
+
+    # TODO: manage execptions
+    def constructFNode(self, nodes, node: msg.Node) -> up.model.fnode.FNode:
+        node_type = None
+        args = None
+        payload = None
+        fnode = None
+
+        if node.node_type == msg.Node.NUMBER:
+            # node_type = self.inverse_map[node.node_type]
+            fnode = self.domain.env.expression_manager.Real(Fraction(node.value))
+
+        elif node.node_type in self.inverse_map:
+            node_type = self.inverse_map[node.node_type]
+            args = [self.constructFNode(nodes, nodes[child_id]) for child_id in node.children]
+
+        elif node.node_type in (msg.Node.PREDICATE, msg.Node.FUNCTION):
+            # node_type = OperatorKind.FLUENT_EXP
+            # TODO: Object or Parameter?
+            parameters = [Object(p.name, self.domain.user_type(p.type), self.domain.env) for p in node.parameters] # TODO: self.domain.user_type(p.type) can throw an execption
+            if node.node_type == msg.Node.PREDICATE:
+                fluent = Fluent(node.name, self.domain.env.type_manager.BoolType(), parameters, self.domain.env)
+            else:
+                fluent = Fluent(node.name, self.domain.env.type_manager.RealType(), parameters, self.domain.env)
+            fnode = self.domain.env.expression_manager.FluentExp(fluent, fluent.signature)
+
+        elif node.node_type == msg.Node.EXPRESSION:
+            pass # TODO
+        elif node.node_type == msg.Node.FUNCTION_MODIFIER:
+            pass # TODO
+
+        if fnode is None:
+            fnode = self.domain.env.expression_manager.create_node(node_type, args, payload)
+
+        return fnode
+
+
+    # TODO
+    def getDomain(self):
+        # return str(self.domain)
+        return self.domain_pddl
+
+    def getName(self) -> str:
+        return self.domain.name
+
+    def getTypes(self):
+        return list(map(lambda t: t.name, self.domain.user_types))
+
+    # TODO: check if type is valid
+    def getConstants(self, type: str):
+        # return self.objects(type)
+        constants = filter(lambda o: o.type.name == type, self.domain._objects)
+        return list(map(lambda c: c.name, constants))
+
+    def getActions(self):
+        instantaneous_actions = filter(lambda a: isinstance(a, InstantaneousAction), self.domain.actions)
+        # instantaneous_actions = set(self.domain.actions) - set(self.domain.durative_actions)
+        return list(map(lambda a: a.name, instantaneous_actions))
 
     def getAction(self, action_name: str, parameters: List[str]):
         instantaneous_actions = filter(lambda a: isinstance(a, InstantaneousAction), self.domain.actions)
