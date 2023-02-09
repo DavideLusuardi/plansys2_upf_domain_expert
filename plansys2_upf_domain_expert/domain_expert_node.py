@@ -10,40 +10,40 @@ from rclpy.node import Node
 class DomainExpertNode(Node):
 
     def __init__(self):
-        super().__init__('domain_expert_upf')
+        super().__init__('domain_expert')
 
         self.domain_expert = None
         self.state = State.PRIMARY_STATE_UNCONFIGURED
         self.declare_parameter("model_file", "")
 
-        self.create_service(GetState, 'domain_expert_upf/get_state',
+        self.create_service(GetState, 'domain_expert/get_state',
                             self.get_state_service_callback)
-        self.create_service(ChangeState, 'domain_expert_upf/change_state',
+        self.create_service(ChangeState, 'domain_expert/change_state',
                             self.change_state_service_callback)
 
-        self.create_service(srv.GetDomain, 'domain_expert_upf/get_domain',
+        self.create_service(srv.GetDomain, 'domain_expert/get_domain',
                             self.get_domain_service_callback)
-        self.create_service(srv.GetDomainName, 'domain_expert_upf/get_domain_name',
+        self.create_service(srv.GetDomainName, 'domain_expert/get_domain_name',
                             self.get_domain_name_service_callback)
-        self.create_service(srv.GetDomainTypes, 'domain_expert_upf/get_domain_types',
+        self.create_service(srv.GetDomainTypes, 'domain_expert/get_domain_types',
                             self.get_domain_types_service_callback)
-        self.create_service(srv.GetDomainConstants, 'domain_expert_upf/get_domain_constants',
+        self.create_service(srv.GetDomainConstants, 'domain_expert/get_domain_constants',
                             self.get_domain_constants_service_callback)
-        self.create_service(srv.GetDomainActions, 'domain_expert_upf/get_domain_actions',
+        self.create_service(srv.GetDomainActions, 'domain_expert/get_domain_actions',
                             self.get_domain_actions_service_callback)
-        self.create_service(srv.GetDomainActionDetails, 'domain_expert_upf/get_domain_action_details',
+        self.create_service(srv.GetDomainActionDetails, 'domain_expert/get_domain_action_details',
                             self.get_domain_action_details_service_callback)
-        self.create_service(srv.GetDomainActions, 'domain_expert_upf/get_domain_durative_actions',
+        self.create_service(srv.GetDomainActions, 'domain_expert/get_domain_durative_actions',
                             self.get_domain_durative_actions_service_callback)
-        self.create_service(srv.GetDomainDurativeActionDetails, 'domain_expert_upf/get_domain_durative_action_details',
+        self.create_service(srv.GetDomainDurativeActionDetails, 'domain_expert/get_domain_durative_action_details',
                             self.get_domain_durative_action_details_service_callback)
-        self.create_service(srv.GetStates, 'domain_expert_upf/get_domain_predicates',
+        self.create_service(srv.GetStates, 'domain_expert/get_domain_predicates',
                             self.get_domain_predicates_service_callback)
-        self.create_service(srv.GetNodeDetails, 'domain_expert_upf/get_domain_predicate_details',
+        self.create_service(srv.GetNodeDetails, 'domain_expert/get_domain_predicate_details',
                             self.get_domain_predicate_details_service_callback)
-        self.create_service(srv.GetStates, 'domain_expert_upf/get_domain_functions',
+        self.create_service(srv.GetStates, 'domain_expert/get_domain_functions',
                             self.get_domain_functions_service_callback)
-        self.create_service(srv.GetNodeDetails, 'domain_expert_upf/get_domain_function_details',
+        self.create_service(srv.GetNodeDetails, 'domain_expert/get_domain_function_details',
                             self.get_domain_function_details_service_callback)
 
     def get_state_service_callback(self, request, response):
@@ -117,7 +117,7 @@ class DomainExpertNode(Node):
 
 
     def get_domain_service_callback(self, request, response):
-        self.get_logger().info(f'get_domain::Incoming request: {request}')
+        # self.get_logger().info(f'get_domain::Incoming request: {request}')
 
         if self.domain_expert is None:
             self.get_logger().error("Requesting service in non-active state")
@@ -129,7 +129,7 @@ class DomainExpertNode(Node):
         return response
 
     def get_domain_name_service_callback(self, request, response):
-        self.get_logger().info(f'get_domain_name::Incoming request: {request}')
+        # self.get_logger().info(f'get_domain_name::Incoming request: {request}')
 
         if self.domain_expert is None:
             self.get_logger().error("Requesting service in non-active state")
@@ -141,8 +141,8 @@ class DomainExpertNode(Node):
         return response
 
     def get_domain_types_service_callback(self, request, response):
-        self.get_logger().info(
-            f'get_domain_types::Incoming request: {request}')
+        # self.get_logger().info(
+        #     f'get_domain_types::Incoming request: {request}')
 
         if self.domain_expert is None:
             self.get_logger().error("Requesting service in non-active state")
@@ -154,8 +154,8 @@ class DomainExpertNode(Node):
         return response
 
     def get_domain_constants_service_callback(self, request, response):
-        self.get_logger().info(
-            f'get_domain_constants::Incoming request: {request}')
+        # self.get_logger().info(
+        #     f'get_domain_constants::Incoming request: {request}')
 
         if self.domain_expert is None:
             self.get_logger().error("Requesting service in non-active state")
@@ -167,8 +167,8 @@ class DomainExpertNode(Node):
         return response
 
     def get_domain_actions_service_callback(self, request, response):
-        self.get_logger().info(
-            f'get_domain_actions::Incoming request: {request}')
+        # self.get_logger().info(
+        #     f'get_domain_actions::Incoming request: {request}')
 
         if self.domain_expert is None:
             self.get_logger().error("Requesting service in non-active state")
@@ -180,8 +180,9 @@ class DomainExpertNode(Node):
         return response
 
     def get_domain_action_details_service_callback(self, request, response):
-        self.get_logger().info(
-            f'get_domain_action_details::Incoming request: {request}')
+        # self.get_logger().info(
+        #     f'get_domain_action_details::Incoming request: {request}')
+        
         if self.domain_expert is None:
             self.get_logger().error("Requesting service in non-active state")
             response.error_info = "Requesting service in non-active state"
@@ -200,8 +201,8 @@ class DomainExpertNode(Node):
         return response
 
     def get_domain_durative_actions_service_callback(self, request, response):
-        self.get_logger().info(
-            f'get_domain_durative_actions::Incoming request: {request}')
+        # self.get_logger().info(
+        #     f'get_domain_durative_actions::Incoming request: {request}')
 
         if self.domain_expert is None:
             self.get_logger().error("Requesting service in non-active state")
@@ -213,8 +214,8 @@ class DomainExpertNode(Node):
         return response
 
     def get_domain_durative_action_details_service_callback(self, request, response):
-        self.get_logger().info(
-            f'get_domain_durative_action_details::Incoming request: {request}')
+        # self.get_logger().info(
+        #     f'get_domain_durative_action_details::Incoming request: {request}')
 
         if self.domain_expert is None:
             self.get_logger().error("Requesting service in non-active state")
@@ -234,8 +235,8 @@ class DomainExpertNode(Node):
         return response
 
     def get_domain_predicates_service_callback(self, request, response):
-        self.get_logger().info(
-            f'get_domain_predicates::Incoming request: {request}')
+        # self.get_logger().info(
+        #     f'get_domain_predicates::Incoming request: {request}')
 
         if self.domain_expert is None:
             self.get_logger().error("Requesting service in non-active state")
@@ -247,8 +248,8 @@ class DomainExpertNode(Node):
         return response
 
     def get_domain_predicate_details_service_callback(self, request, response):
-        self.get_logger().info(
-            f'get_domain_predicate_details::Incoming request: {request}')
+        # self.get_logger().info(
+        #     f'get_domain_predicate_details::Incoming request: {request}')
 
         if self.domain_expert is None:
             self.get_logger().error("Requesting service in non-active state")
@@ -267,8 +268,8 @@ class DomainExpertNode(Node):
         return response
 
     def get_domain_functions_service_callback(self, request, response):
-        self.get_logger().info(
-            f'get_domain_functions::Incoming request: {request}')
+        # self.get_logger().info(
+        #     f'get_domain_functions::Incoming request: {request}')
 
         if self.domain_expert is None:
             self.get_logger().error("Requesting service in non-active state")
@@ -280,8 +281,8 @@ class DomainExpertNode(Node):
         return response
 
     def get_domain_function_details_service_callback(self, request, response):
-        self.get_logger().info(
-            f'get_domain_function_details::Incoming request: {request}')
+        # self.get_logger().info(
+        #     f'get_domain_function_details::Incoming request: {request}')
 
         if self.domain_expert is None:
             self.get_logger().error("Requesting service in non-active state")
