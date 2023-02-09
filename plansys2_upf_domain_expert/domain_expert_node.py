@@ -80,11 +80,11 @@ class DomainExpertNode(Node):
             "model_file").get_parameter_value().string_value
         try:
             self.domain_expert = DomainExpert(model_file)
-            self.state = State.PRIMARY_STATE_INACTIVE
         except:
             self.get_logger().error("PDDL syntax error")
             return False
 
+        self.state = State.PRIMARY_STATE_INACTIVE
         self.get_logger().info(f"[{self.get_name()}] Configured")
         return True
 

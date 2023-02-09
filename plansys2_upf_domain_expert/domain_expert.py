@@ -1,28 +1,19 @@
 from plansys2_msgs import msg
 
 import unified_planning as up
-from unified_planning.io import PDDLReader
+from unified_planning.io import PDDLReader, PDDLWriter
 from unified_planning.model.action import InstantaneousAction
 from unified_planning.model.operators import OperatorKind
 from unified_planning.model.effect import EffectKind
-from unified_planning.model import timing, Fluent, types
-from unified_planning.model.parameter import Parameter
-from unified_planning.model.object import Object
+from unified_planning.model import timing
 
 from typing import List, Dict, Optional
-
-from fractions import Fraction
 
 
 class DomainExpert():
 
     def __init__(self, domain_filename: str):
         self.domain = PDDLReader().parse_problem(domain_filename, None)
-        
-        self.domain_pddl = None 
-        with open(domain_filename) as f:
-            ll = f.readlines()
-            self.domain_pddl = ''.join(ll)
         
         # TODO: fix the mapping, there are some UnsupportedConstruct
         self.map_types = {
@@ -93,13 +84,7 @@ class DomainExpert():
         return params_msg
 
     def constructTree(self, fnode: up.model.fnode.FNode, nodes: List[msg.Node], params_map: Optional[Dict[str, str]] = None) -> msg.Node:
-        # print(f"fnode: {fnode}")
-        # print(f"node type: {fnode.node_type}")
-        # print(f"node id: {fnode.node_id}")
-        # print(f"args: {fnode.args}\n")
-
         node = msg.Node()
-        # node.node_id = fnode.node_id # TODO
         node.node_id = len(nodes)
         node.children = list()
         nodes.append(node)
@@ -113,10 +98,8 @@ class DomainExpert():
         
         elif fnode.node_type in (OperatorKind.INT_CONSTANT, OperatorKind.REAL_CONSTANT):
             node.value = float(fnode.constant_value())
-
         
         if fnode.node_type == OperatorKind.FLUENT_EXP:
-            # print(f"fluent type: {fnode.fluent().type}\n")
             # TODO: are there only predicates and functions?
             if fnode.fluent().type.is_bool_type():
                 node.node_type = msg.Node.PREDICATE
@@ -150,12 +133,6 @@ class DomainExpert():
         nodes.append(and_node)
 
         for effect in effects:
-            # print("======effect=========")
-            # print(f"effect: {effect}")
-            # print(f"effect.fluent: {effect.fluent}")
-            # print(f"effect.value: {effect.value}")
-            # print(f"effect.kind: {effect.kind}")
-            
             if effect.value.is_bool_constant():
                 node_parent = and_node
                 if effect.value.bool_constant_value() == False:
@@ -182,46 +159,9 @@ class DomainExpert():
                 value_node = self.constructTree(effect.value, nodes, params_map)
                 node.children = [fluent_node.node_id, value_node.node_id]
 
-    # TODO: manage execptions
-    def constructFNode(self, nodes, node: msg.Node) -> up.model.fnode.FNode:
-        node_type = None
-        args = None
-        payload = None
-        fnode = None
-
-        if node.node_type == msg.Node.NUMBER:
-            # node_type = self.inverse_map[node.node_type]
-            fnode = self.domain.env.expression_manager.Real(Fraction(node.value))
-
-        elif node.node_type in self.inverse_map:
-            node_type = self.inverse_map[node.node_type]
-            args = [self.constructFNode(nodes, nodes[child_id]) for child_id in node.children]
-
-        elif node.node_type in (msg.Node.PREDICATE, msg.Node.FUNCTION):
-            # node_type = OperatorKind.FLUENT_EXP
-            # TODO: Object or Parameter?
-            parameters = [Object(p.name, self.domain.user_type(p.type), self.domain.env) for p in node.parameters] # TODO: self.domain.user_type(p.type) can throw an execption
-            if node.node_type == msg.Node.PREDICATE:
-                fluent = Fluent(node.name, self.domain.env.type_manager.BoolType(), parameters, self.domain.env)
-            else:
-                fluent = Fluent(node.name, self.domain.env.type_manager.RealType(), parameters, self.domain.env)
-            fnode = self.domain.env.expression_manager.FluentExp(fluent, fluent.signature)
-
-        elif node.node_type == msg.Node.EXPRESSION:
-            pass # TODO
-        elif node.node_type == msg.Node.FUNCTION_MODIFIER:
-            pass # TODO
-
-        if fnode is None:
-            fnode = self.domain.env.expression_manager.create_node(node_type, args, payload)
-
-        return fnode
-
-
-    # TODO
+    # TODO: domain pddl string can be cached
     def getDomain(self):
-        # return str(self.domain)
-        return self.domain_pddl
+        return PDDLWriter(self.domain).get_domain()
 
     def getName(self) -> str:
         return self.domain.name
@@ -258,7 +198,6 @@ class DomainExpert():
                 and_node.node_id = len(action_msg.preconditions.nodes)
                 action_msg.preconditions.nodes.append(and_node)
                 for precondition in action.preconditions: # TODO: check if correct, can we have many preconditions?
-                    # print("======precondition=========")
                     node = self.constructTree(precondition, action_msg.preconditions.nodes, params_map)
                     and_node.children.append(node.node_id)
 
@@ -356,7 +295,6 @@ class DomainExpert():
 
         return None
 
-
     def getFunctions(self):
         functions = filter(lambda f: f.type.is_real_type(), self.domain.fluents)
         states = list()
@@ -382,4 +320,3 @@ class DomainExpert():
                 return function_msg
 
         return None
-
