@@ -306,10 +306,11 @@ def main():
 
     domain_expert_node = DomainExpertNode()
 
-    rclpy.spin(domain_expert_node)
-
-    rclpy.shutdown()
-
+    try:
+        rclpy.spin(domain_expert_node)
+        rclpy.shutdown()
+    except KeyboardInterrupt:
+        pass
 
 if __name__ == '__main__':
     main()

@@ -83,10 +83,13 @@ class DomainExpert():
         
         return params_msg
 
-    def constructTree(self, fnode: up.model.fnode.FNode, nodes: List[msg.Node], params_map: Optional[Dict[str, str]] = None) -> msg.Node:
+    def constructTree(self, fnode: up.model.fnode.FNode, nodes: List[msg.Node], 
+                      negate: Optional[bool] = False, 
+                      params_map: Optional[Dict[str, str]] = None) -> msg.Node:
         node = msg.Node()
         node.node_id = len(nodes)
         node.children = list()
+        node.negate = negate
         nodes.append(node)
 
         node.node_type = self.map_types[fnode.node_type]
@@ -95,7 +98,8 @@ class DomainExpert():
 
         # elif fnode.node_type in self.map_fn_modifier_types: # TODO: is needed in this function?
         #     node.modifier_type = self.map_fn_modifier_types[fnode.node_type]
-        
+
+        # TODO: consider OperatorKind.BOOL_CONSTANT and OperatorKind.OBJECT_EXP
         elif fnode.node_type in (OperatorKind.INT_CONSTANT, OperatorKind.REAL_CONSTANT):
             node.value = float(fnode.constant_value())
         
@@ -119,8 +123,9 @@ class DomainExpert():
             node.parameters = self.constructParameters(parameters, params_map) # TODO: reuse previously constructed parameters
 
         else:
+            negate = fnode.node_type == OperatorKind.NOT
             for child_fnode in fnode.args:
-                child_node = self.constructTree(child_fnode, nodes, params_map)
+                child_node = self.constructTree(child_fnode, nodes, negate=negate, params_map=params_map)
                 node.children.append(child_node.node_id)
 
         return node
@@ -144,7 +149,7 @@ class DomainExpert():
                     nodes.append(not_node)
                     node_parent = not_node
 
-                fluent_node = self.constructTree(effect.fluent, nodes, params_map)
+                fluent_node = self.constructTree(effect.fluent, nodes, params_map=params_map)
                 node_parent.children.append(fluent_node.node_id)
 
             else:
@@ -155,8 +160,8 @@ class DomainExpert():
 
                 node.node_type = self.map_types[effect.kind] # TODO: map_types can be modified removing EffectKind
                 node.modifier_type = self.map_fn_modifier_types[effect.kind]
-                fluent_node = self.constructTree(effect.fluent, nodes, params_map)
-                value_node = self.constructTree(effect.value, nodes, params_map)
+                fluent_node = self.constructTree(effect.fluent, nodes, params_map=params_map)
+                value_node = self.constructTree(effect.value, nodes, params_map=params_map)
                 node.children = [fluent_node.node_id, value_node.node_id]
 
     # TODO: domain pddl string can be cached
@@ -198,7 +203,7 @@ class DomainExpert():
                 and_node.node_id = len(action_msg.preconditions.nodes)
                 action_msg.preconditions.nodes.append(and_node)
                 for precondition in action.preconditions: # TODO: check if correct, can we have many preconditions?
-                    node = self.constructTree(precondition, action_msg.preconditions.nodes, params_map)
+                    node = self.constructTree(precondition, action_msg.preconditions.nodes, params_map=params_map)
                     and_node.children.append(node.node_id)
 
                 action_msg.effects = msg.Tree()
@@ -235,19 +240,19 @@ class DomainExpert():
                     if time_interval.lower == timing.StartTiming() and time_interval.upper == timing.EndTiming():
                         and_node = and_nodes[0]
                         for condition in conditions:
-                            node = self.constructTree(condition, durative_action_msg.over_all_requirements.nodes, params_map)
+                            node = self.constructTree(condition, durative_action_msg.over_all_requirements.nodes, params_map=params_map)
                             and_node.children.append(node.node_id)
 
                     elif time_interval.lower == timing.StartTiming():
                         and_node = and_nodes[1]
                         for condition in conditions:
-                            node = self.constructTree(condition, durative_action_msg.at_start_requirements.nodes, params_map)
+                            node = self.constructTree(condition, durative_action_msg.at_start_requirements.nodes, params_map=params_map)
                             and_node.children.append(node.node_id)
 
                     elif time_interval.upper == timing.EndTiming():
                         and_node = and_nodes[2]
                         for condition in conditions:
-                            node = self.constructTree(condition, durative_action_msg.at_end_requirements.nodes, params_map)
+                            node = self.constructTree(condition, durative_action_msg.at_end_requirements.nodes, params_map=params_map)
                             and_node.children.append(node.node_id)
                 
                 for time, effects in durative_action.effects.items():
