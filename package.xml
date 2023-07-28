@@ -3,9 +3,9 @@
 <package format="3">
   <name>plansys2_upf_domain_expert</name>
   <version>0.0.1</version>
-  <description>TODO: Package description</description>
+  <description>This package contains the Domain Expert module for the ROS2 Planning System based on the Unified Planning Framework</description>
   <maintainer email="davide.lusuardi@studenti.unitn.it">davide</maintainer>
-  <license>TODO: License declaration</license>
+  <license>Apache License, Version 2.0</license>
 
   <depend>rclpy</depend>
   <depend>plansys2_msgs</depend>

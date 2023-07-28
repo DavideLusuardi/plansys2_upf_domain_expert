@@ -15,23 +15,18 @@ class DomainExpert():
     def __init__(self, domain_filename: str):
         self.domain = PDDLReader().parse_problem(domain_filename, None)
         
-        # TODO: fix the mapping, there are some UnsupportedConstruct
         self.map_types = {
-            OperatorKind.BOOL_CONSTANT  : msg.Node.NUMBER, # TODO
+            OperatorKind.BOOL_CONSTANT  : msg.Node.NUMBER,
             OperatorKind.INT_CONSTANT   : msg.Node.NUMBER,
             OperatorKind.REAL_CONSTANT  : msg.Node.NUMBER,
             OperatorKind.AND            : msg.Node.AND,
             OperatorKind.OR             : msg.Node.OR,
             OperatorKind.NOT            : msg.Node.NOT,
-            # OperatorKind.IMPLIES        : msg.Node.PREDICATE,
-            # OperatorKind.IFF            : msg.Node.PREDICATE,
-            # OperatorKind.EXISTS         : msg.Node.PREDICATE,
-            # OperatorKind.FORALL         : msg.Node.PREDICATE,
-            OperatorKind.FLUENT_EXP     : msg.Node.PREDICATE, # TODO: fluent_exp is function or predicate
-            # OperatorKind.PARAM_EXP      : msg.Node.EXPRESSION,
-            # OperatorKind.VARIABLE_EXP   : msg.Node.EXPRESSION,
-            # OperatorKind.OBJECT_EXP     : msg.Node.EXPRESSION,
-            # OperatorKind.TIMING_EXP     : msg.Node.EXPRESSION,
+            # OperatorKind.IMPLIES        : msg.Node.PREDICATE, # not supported
+            # OperatorKind.IFF            : msg.Node.PREDICATE, # not supported
+            # OperatorKind.EXISTS         : msg.Node.PREDICATE, # not supported
+            # OperatorKind.FORALL         : msg.Node.PREDICATE, # not supported
+            OperatorKind.FLUENT_EXP     : msg.Node.PREDICATE, # fluent_exp is function or predicate
             OperatorKind.PLUS           : msg.Node.EXPRESSION,
             OperatorKind.MINUS          : msg.Node.EXPRESSION,
             OperatorKind.TIMES          : msg.Node.EXPRESSION,
@@ -39,10 +34,6 @@ class DomainExpert():
             OperatorKind.EQUALS         : msg.Node.EXPRESSION,
             OperatorKind.LE             : msg.Node.EXPRESSION,
             OperatorKind.LT             : msg.Node.EXPRESSION,
-
-            EffectKind.ASSIGN           : msg.Node.FUNCTION_MODIFIER,
-            EffectKind.INCREASE         : msg.Node.FUNCTION_MODIFIER,
-            EffectKind.DECREASE         : msg.Node.FUNCTION_MODIFIER,
         }
 
         self.map_exp_types = {
@@ -55,21 +46,14 @@ class DomainExpert():
             OperatorKind.LT             : msg.Node.COMP_LT,
         }
         
-        # TODO: SCALE_UP, SCALE_DOWN not supported
         self.map_fn_modifier_types = {
             EffectKind.ASSIGN           : msg.Node.ASSIGN,
             EffectKind.INCREASE         : msg.Node.INCREASE,
             EffectKind.DECREASE         : msg.Node.DECREASE,
         }
 
-        self.inverse_map = {
-            msg.Node.NUMBER             : OperatorKind.REAL_CONSTANT,
-            msg.Node.AND                : OperatorKind.AND,
-            msg.Node.OR                 : OperatorKind.OR,
-            msg.Node.NOT                : OperatorKind.NOT,
-        }
-
-    def constructParameters(self, parameters: List[up.model.Parameter], params_map: Optional[Dict[str, str]] = None):
+    def constructParameters(self, parameters: List[up.model.Parameter], 
+                            params_map: Optional[Dict[str, str]] = None) -> List[msg.Param]:
         params_msg = list()
         for param in parameters:
             param_msg = msg.Param()
@@ -96,15 +80,10 @@ class DomainExpert():
         if fnode.node_type in self.map_exp_types:
             node.expression_type = self.map_exp_types[fnode.node_type]
 
-        # elif fnode.node_type in self.map_fn_modifier_types: # TODO: is needed in this function?
-        #     node.modifier_type = self.map_fn_modifier_types[fnode.node_type]
-
-        # TODO: consider OperatorKind.BOOL_CONSTANT and OperatorKind.OBJECT_EXP
         elif fnode.node_type in (OperatorKind.INT_CONSTANT, OperatorKind.REAL_CONSTANT):
             node.value = float(fnode.constant_value())
         
         if fnode.node_type == OperatorKind.FLUENT_EXP:
-            # TODO: are there only predicates and functions?
             if fnode.fluent().type.is_bool_type():
                 node.node_type = msg.Node.PREDICATE
             else:
@@ -119,8 +98,8 @@ class DomainExpert():
                 elif child_fnode.is_object_exp():
                     parameters.append(child_fnode.object())
                 else:
-                    raise # TODO
-            node.parameters = self.constructParameters(parameters, params_map) # TODO: reuse previously constructed parameters
+                    raise Exception(f"parameter type '{child_fnode.node_type}' not supported")
+            node.parameters = self.constructParameters(parameters, params_map)
 
         else:
             negate = fnode.node_type == OperatorKind.NOT
@@ -130,7 +109,8 @@ class DomainExpert():
 
         return node
 
-    def constructEffectsTree(self, effects, nodes, params_map: Dict[str, str]):
+    def constructEffectsTree(self, effects: List[up.model.effect.Effect], 
+                             nodes: List[msg.Node], params_map: Dict[str, str]):
         and_node = msg.Node()
         and_node.node_type = self.map_types[OperatorKind.AND]
         and_node.node_id = len(nodes)
@@ -158,34 +138,33 @@ class DomainExpert():
                 and_node.children.append(node.node_id)
                 nodes.append(node)
 
-                node.node_type = self.map_types[effect.kind] # TODO: map_types can be modified removing EffectKind
+                node.node_type = msg.Node.FUNCTION_MODIFIER
                 node.modifier_type = self.map_fn_modifier_types[effect.kind]
                 fluent_node = self.constructTree(effect.fluent, nodes, params_map=params_map)
                 value_node = self.constructTree(effect.value, nodes, params_map=params_map)
                 node.children = [fluent_node.node_id, value_node.node_id]
 
-    # TODO: domain pddl string can be cached
-    def getDomain(self):
+    def getDomain(self) -> str:
         return PDDLWriter(self.domain).get_domain()
 
     def getName(self) -> str:
         return self.domain.name
 
-    def getTypes(self):
+    def getTypes(self) -> List[str]:
         return list(map(lambda t: t.name, self.domain.user_types))
 
-    # TODO: check if type is valid
-    def getConstants(self, type: str):
-        # return self.objects(type)
-        constants = filter(lambda o: o.type.name == type, self.domain._objects)
-        return list(map(lambda c: c.name, constants))
-
-    def getActions(self):
+    def getConstants(self, type: str) -> List[str]:
+        try:
+            type = self.domain.user_type(type)
+            return list(map(lambda o: o.name, self.domain.objects(type)))
+        except:
+            return []
+        
+    def getActions(self) -> List[str]:
         instantaneous_actions = filter(lambda a: isinstance(a, InstantaneousAction), self.domain.actions)
-        # instantaneous_actions = set(self.domain.actions) - set(self.domain.durative_actions)
         return list(map(lambda a: a.name, instantaneous_actions))
 
-    def getAction(self, action_name: str, parameters: List[str]):
+    def getAction(self, action_name: str, parameters: List[str]) -> msg.Action:
         instantaneous_actions = filter(lambda a: isinstance(a, InstantaneousAction), self.domain.actions)
         for action in instantaneous_actions:
             if action.name == action_name:
@@ -202,7 +181,7 @@ class DomainExpert():
                 and_node.children = list()
                 and_node.node_id = len(action_msg.preconditions.nodes)
                 action_msg.preconditions.nodes.append(and_node)
-                for precondition in action.preconditions: # TODO: check if correct, can we have many preconditions?
+                for precondition in action.preconditions:
                     node = self.constructTree(precondition, action_msg.preconditions.nodes, params_map=params_map)
                     and_node.children.append(node.node_id)
 
@@ -214,10 +193,10 @@ class DomainExpert():
 
         return None
 
-    def getDurativeActions(self):
+    def getDurativeActions(self) -> List[str]:
         return list(map(lambda a: a.name, self.domain.durative_actions))
 
-    def getDurativeAction(self, action_name: str, parameters: List[str]):
+    def getDurativeAction(self, action_name: str, parameters: List[str]) -> msg.Action:
         for durative_action in self.domain.durative_actions:
             if durative_action.name == action_name:
                 durative_action_msg = msg.DurativeAction()
@@ -274,7 +253,7 @@ class DomainExpert():
 
         return None
 
-    def getPredicates(self):
+    def getPredicates(self) -> List[msg.Node]:
         predicates = filter(lambda f: f.type.is_bool_type(), self.domain.fluents)
         states = list()
         for i, p in enumerate(predicates):
@@ -285,12 +264,12 @@ class DomainExpert():
             states.append(pred)
         return states
 
-    def getPredicate(self, predicate_name: str):
+    def getPredicate(self, predicate_name: str) -> msg.Node:
         predicates = filter(lambda f: f.type.is_bool_type(), self.domain.fluents)
         for predicate in predicates:
             if predicate.name == predicate_name:
                 predicate_msg = msg.Node()
-                predicate_msg.node_type = msg.Node.PREDICATE # TODO: plansys2 sets UNKNOWN
+                predicate_msg.node_type = msg.Node.PREDICATE
                 predicate_msg.name = predicate.name
 
                 params_map = dict([(p.name, f"?{p.type.name}{i}") for i,p in enumerate(predicate.signature)])
@@ -300,7 +279,7 @@ class DomainExpert():
 
         return None
 
-    def getFunctions(self):
+    def getFunctions(self) -> List[msg.Node]:
         functions = filter(lambda f: f.type.is_real_type(), self.domain.fluents)
         states = list()
         for i, f in enumerate(functions):
@@ -311,7 +290,7 @@ class DomainExpert():
             states.append(func)
         return states
 
-    def getFunction(self, function_name: str):
+    def getFunction(self, function_name: str) -> msg.Node:
         functions = filter(lambda f: f.type.is_real_type(), self.domain.fluents)
         for function in functions:
             if function.name == function_name:
