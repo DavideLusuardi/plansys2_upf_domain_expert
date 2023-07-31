@@ -15,6 +15,9 @@ setup(
         
         # Include all launch files.
         (os.path.join('share', package_name, 'launch'), glob('launch/*launch.[pxy][yma]*')),
+        
+        # Include test files
+        (os.path.join('share', package_name, 'test', 'pddl'), glob('test/pddl/*')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
