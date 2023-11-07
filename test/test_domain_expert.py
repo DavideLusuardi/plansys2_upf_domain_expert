@@ -6,8 +6,7 @@ import pytest
 
 
 package_share_directory = get_package_share_directory('plansys2_upf_domain_expert')
-domain_pddl_file = f'{package_share_directory}/test/pddl/domain1.pddl'
-domain2_pddl_file = f'{package_share_directory}/test/pddl/domain2.pddl'
+domain_pddl_file = f'{package_share_directory}/test/pddl/domain.pddl'
 
 @pytest.fixture
 def domain() -> DomainExpert:
